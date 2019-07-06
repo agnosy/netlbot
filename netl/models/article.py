@@ -20,7 +20,7 @@ class Article(Base):
     published_at = Column(Date)
     content = Column(String)
     created_at = Column(Date, default=datetime.utcnow)
-    created_by = Column(String, default='nhcli')
+    created_by = Column(String, default='netlbot')
     updated_at = Column(Date)
     updated_by = Column(String)
 

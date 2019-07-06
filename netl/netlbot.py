@@ -48,6 +48,7 @@ def cleanse():
 def harvest(domains, sources, send_to_console, save_to_db):
     """Harvest the data with default options."""
     harvester = Harvester()
+    harvester.populate_sources()
     harvester.harvest(domains, sources, send_to_console, save_to_db)
 
 if __name__ == '__main__':

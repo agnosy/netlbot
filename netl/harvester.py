@@ -42,6 +42,33 @@ class Harvester:
             )
         self.session.commit()
 
+    def populate_sources(self):
+        response = self.api.get_sources()
+        print(
+            f'retrieved [{len(response["sources"])}] sources'
+            f' with status [{response["status"]}]'
+        )
+
+        sources = response["sources"]
+        for source in sources:
+            source_from_db = \
+                self.session.query(Source).filter(
+                    Source.text_id.like(source["id"])
+                ).first()
+            if source_from_db is None:
+                self.session.add(
+                    Source(
+                        source["id"],
+                        source["name"],
+                        source["description"],
+                        source["url"],
+                        source["category"],
+                        source["language"],
+                        source["country"],
+                    )
+                )
+                self.session.commit()
+
     def add_if_not_exists(self, session, text_id, name):
         source = session.query(Source).filter(Source.name.like(name)).first()
         if source is None:

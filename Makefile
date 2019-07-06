@@ -1,6 +1,18 @@
 help:
-	@echo "Usage: make build"
+	@echo "Usage: make deploy"
+	@echo "       make migrate"
+	@echo "       make rollback"
+	@echo "       make run"
 
-build:
+harvest:
+	python -m netl.netlbot harvest
+
+deploy:
 	pip install --editable .
+
+migrate:
+	alembic upgrade head
+
+rollback:
+	alembic downgrade base
 
