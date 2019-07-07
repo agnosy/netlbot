@@ -1,5 +1,6 @@
 import click
 import click_config_file
+import logging
 import yaml
 from .harvester import Harvester
 
@@ -11,6 +12,7 @@ def yaml_provider(file_path, cmd_name):
 
 @click.group()
 def run():
+    logging.basicConfig(level=logging.INFO)
     pass
 
 @run.command()
@@ -72,7 +74,7 @@ def harvest(domains, sources, send_to_console, save_to_db):
     is specified the settings from the file will be used as opposed
     to the defaults.
     """
-    print(f"[{domains}] [{sources}] [{send_to_console}] [{save_to_db}]")
+    logging.info(f"[{domains}] [{sources}] [{send_to_console}] [{save_to_db}]")
     harvester = Harvester(send_to_console, save_to_db)
     harvester.populate_sources()
     harvester.harvest(domains, sources, send_to_console, save_to_db)

@@ -1,4 +1,5 @@
 import pprint
+import logging
 
 from newsapi import NewsApiClient
 from .models.base import Session
@@ -16,7 +17,7 @@ class Harvester:
 
     def harvest(self, domains, sources, send_to_console, save_to_db):
         response = self.api.get_everything(sources=sources)
-        print(
+        logging.info(
             f'retrieved [{response["totalResults"]}] articles'
             f' with status [{response["status"]}]'
         )
@@ -47,7 +48,7 @@ class Harvester:
 
     def populate_sources(self):
         response = self.api.get_sources()
-        print(
+        logging.info(
             f'retrieved [{len(response["sources"])}] sources'
             f' with status [{response["status"]}]'
         )
