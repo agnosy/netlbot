@@ -1,0 +1,5 @@
+domains: wsj.com, nytimes.com, bbc.com
+sources: the-wall-street-journal, the-new-york-times, bbc-news
+send-to-console: 0
+save-to-db: 1
+

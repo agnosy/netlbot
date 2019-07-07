@@ -7,10 +7,12 @@ from .models.source import Source
 from . import helpers
 
 class Harvester:
-    def __init__(self):
+    def __init__(self, send_to_console, save_to_db):
         self.api = NewsApiClient(api_key='27a7298d46f940ffbbb0f514a9b28496')
         self.pp = pprint.PrettyPrinter(indent=4)
-        self.session = Session()
+        self.save_to_db = save_to_db
+        if self.save_to_db:
+            self.session = Session()
 
     def harvest(self, domains, sources, send_to_console, save_to_db):
         response = self.api.get_everything(sources=sources)
@@ -21,26 +23,27 @@ class Harvester:
 
         articles = response["articles"]
         for article in articles:
-            source = self.add_if_not_exists(
-                self.session,
-                article["source"]["id"],
-                article["source"]["name"]
-            )
             if send_to_console:
                 self.pp.pprint(article)
-            self.session.add(
-                Article(
-                    article["author"],
-                    article["title"],
-                    article["description"],
-                    article["url"],
-                    article["urlToImage"],
-                    article["publishedAt"],
-                    article["content"],
-                    source,
+            if save_to_db:
+                source = self.add_if_not_exists(
+                    self.session,
+                    article["source"]["id"],
+                    article["source"]["name"]
                 )
-            )
-        self.session.commit()
+                self.session.add(
+                    Article(
+                        article["author"],
+                        article["title"],
+                        article["description"],
+                        article["url"],
+                        article["urlToImage"],
+                        article["publishedAt"],
+                        article["content"],
+                        source,
+                    )
+                )
+                self.session.commit()
 
     def populate_sources(self):
         response = self.api.get_sources()
@@ -51,23 +54,24 @@ class Harvester:
 
         sources = response["sources"]
         for source in sources:
-            source_from_db = \
-                self.session.query(Source).filter(
-                    Source.text_id.like(source["id"])
-                ).first()
-            if source_from_db is None:
-                self.session.add(
-                    Source(
-                        source["id"],
-                        source["name"],
-                        source["description"],
-                        source["url"],
-                        source["category"],
-                        source["language"],
-                        source["country"],
+            if self.save_to_db:
+                source_from_db = \
+                    self.session.query(Source).filter(
+                        Source.text_id.like(source["id"])
+                    ).first()
+                if source_from_db is None:
+                    self.session.add(
+                        Source(
+                            source["id"],
+                            source["name"],
+                            source["description"],
+                            source["url"],
+                            source["category"],
+                            source["language"],
+                            source["country"],
+                        )
                     )
-                )
-                self.session.commit()
+                    self.session.commit()
 
     def add_if_not_exists(self, session, text_id, name):
         source = session.query(Source).filter(Source.name.like(name)).first()
@@ -80,5 +84,6 @@ class Harvester:
         return source
 
     def __del__(self):
-        self.session.close()
+        if self.save_to_db:
+            self.session.close()
 

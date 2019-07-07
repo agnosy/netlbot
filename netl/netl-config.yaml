@@ -1,0 +1,12 @@
+classify:
+    verbose: 0
+
+cleanse:
+    verbose: 0
+
+harvest:
+    domains: nytimes.com, bloomberg.com
+    sources: the-new-york-times
+    send_to_console: 0
+    save_to_db: 1
+

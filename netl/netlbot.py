@@ -1,21 +1,41 @@
 import click
+import click_config_file
+import yaml
 from .harvester import Harvester
+
+YAML_CONFIG_FILE_PATH="/tmp/netl-config.yaml"
+
+def yaml_provider(file_path, cmd_name):
+    with open(file_path) as config_data:
+        return yaml.safe_load(config_data)[cmd_name]
 
 @click.group()
 def run():
     pass
 
 @run.command()
+@click_config_file.configuration_option(
+    config_file_name=YAML_CONFIG_FILE_PATH,
+    provider=yaml_provider
+)
 def classify():
     """Classify the cleansed data."""
     pass
 
 @run.command()
+@click_config_file.configuration_option(
+    config_file_name=YAML_CONFIG_FILE_PATH,
+    provider=yaml_provider
+)
 def cleanse():
     """Cleanse data extracted from news sources."""
     pass
 
 @run.command()
+@click_config_file.configuration_option(
+    config_file_name=YAML_CONFIG_FILE_PATH,
+    provider=yaml_provider
+)
 @click.option(
     '--domains',
     envvar='NETL_HARVEST_DOMAINS',
@@ -46,8 +66,14 @@ def cleanse():
     help='Save the output to database. (disabled-0, enabled-1, default: 1)'
 )
 def harvest(domains, sources, send_to_console, save_to_db):
-    """Harvest the data with default options."""
-    harvester = Harvester()
+    """
+    Harvest the data given domains, sources, and additional flags
+    to control the behavior of the harvestor.  If --config option
+    is specified the settings from the file will be used as opposed
+    to the defaults.
+    """
+    print(f"[{domains}] [{sources}] [{send_to_console}] [{save_to_db}]")
+    harvester = Harvester(send_to_console, save_to_db)
     harvester.populate_sources()
     harvester.harvest(domains, sources, send_to_console, save_to_db)
 
